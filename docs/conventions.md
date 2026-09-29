@@ -33,10 +33,12 @@ new service, not just the ones that already use them.
 
 ## Git / Gitea
 
-- Active repos are mirrored from Gitea to GitHub on a 1-hour sync
-  interval. This is also how Claude can read repo contents without
-  needing separate access to the private Gitea instance — read the
-  GitHub mirror.
+- **GitHub is primary.** Active repos are pull-mirrored from GitHub
+  into Gitea on a 1-hour sync interval — Gitea is the backup copy, not
+  the source. Push to GitHub; Gitea catches up automatically.
+- This is also how Claude can read repo contents without needing
+  separate access to the private Gitea instance — read the GitHub
+  mirror directly, since it's always the source of truth anyway.
 - GitHub MCP access is **read-only** by project convention: Claude
   provides file contents for Joshua to commit manually, never pushes
   directly.

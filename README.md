@@ -24,7 +24,7 @@ knowledge scattered across chats.
 
 | Service     | Container name | Port(s)         | Data path          | Notes |
 |-------------|-----------------|------------------|---------------------|-------|
-| Gitea       | `gitea-gitea-1` | 3000, 222 (ssh)  | `/srv/gitea`        | Self-hosted git, mirrors active repos to GitHub hourly |
+| Gitea       | `gitea-gitea-1` | 3000, 222 (ssh)  | `/srv/gitea`        | Self-hosted git, pull-mirrors from GitHub hourly (GitHub is primary) |
 | n8n         | `n8n-n8n-1`     | 5678             | `/srv/n8n`           | Automation/workflow engine |
 | Postgres    | `postgres`      | 5432 (localhost) | `/srv/postgres/data` | `pgvector/pgvector:pg17`, database `life` |
 
