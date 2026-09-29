@@ -46,10 +46,11 @@ Gmail (Handyman) → Google Takeout (one-time backlog)
 - [x] n8n connected to Postgres on `homelab-net`, connectivity confirmed
 - [x] Handyman Gmail exported via Google Takeout (341MB zip →
       625MB mbox), extracted to `/srv/takeout` on the server
-- [ ] **Next: Python script to parse the mbox and load `accounts`/
-      `threads`/`messages`.** Plan: parse-only pass first (print first
-      5 threads to terminal, no DB writes) to confirm correctness,
-      then an insert pass.
+- [x] `scripts/parse_mbox.py` written — dry-run mode (print only) and
+      insert mode (writes to `accounts`/`threads`/`messages`, dedup on
+      `message_id`, excludes Spam/Trash via `X-Gmail-Labels`)
+- [ ] **Next: run the dry-run pass against the real mbox, eyeball the
+      output, then run the real insert pass.**
 - [ ] LLM tagging pass (category, deadline extraction)
 - [ ] First generated report
 
