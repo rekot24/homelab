@@ -35,17 +35,43 @@ from html.parser import HTMLParser
 # ---------- helpers ----------
 
 class _TextExtractor(HTMLParser):
-    """Very small HTML-to-text fallback for messages with no text/plain part."""
+    """Very small HTML-to-text fallback for messages with no text/plain part.
+    Skips content inside <style> and <script> tags, which otherwise leaks
+    raw CSS/JS into the extracted text."""
 
     def __init__(self):
         super().__init__()
         self.chunks = []
+        self._skip_depth = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ("style", "script"):
+            self._skip_depth += 1
+
+    def handle_endtag(self, tag):
+        if tag in ("style", "script") and self._skip_depth > 0:
+            self._skip_depth -= 1
 
     def handle_data(self, data):
-        self.chunks.append(data)
+        if self._skip_depth == 0:
+            self.chunks.append(data)
 
     def text(self):
         return re.sub(r"\n{3,}", "\n\n", " ".join(self.chunks)).strip()
+
+
+_LOOKS_LIKE_HTML = re.compile(r"<\s*(html|body|table|div|style|script)\b", re.IGNORECASE)
+
+
+def maybe_strip_html(text):
+    """Some senders mislabel an HTML body as text/plain. If the 'plain' text
+    is actually markup, run it through the tag stripper instead of returning
+    raw CSS/HTML."""
+    if text and _LOOKS_LIKE_HTML.search(text):
+        extractor = _TextExtractor()
+        extractor.feed(text)
+        return extractor.text()
+    return text
 
 
 def decode_str(value):
@@ -85,7 +111,7 @@ def get_body_text(msg):
             elif ctype == "text/html" and html is None:
                 html = text
         if plain:
-            return plain.strip()
+            return maybe_strip_html(plain.strip())
         if html:
             extractor = _TextExtractor()
             extractor.feed(html)
@@ -104,7 +130,7 @@ def get_body_text(msg):
             extractor = _TextExtractor()
             extractor.feed(text)
             return extractor.text()
-        return text.strip()
+        return maybe_strip_html(text.strip())
 
 
 def sender_domain(address):
